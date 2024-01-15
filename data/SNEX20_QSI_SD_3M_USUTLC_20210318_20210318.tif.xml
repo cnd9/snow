@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE GranuleMetaDataFile SYSTEM "http://ecsinfo.gsfc.nasa.gov/ECSInfo/ecsmetadata/dtds/DPL/ECS/ScienceGranuleMetadata.dtd">
+<GranuleMetaDataFile>
+    <DTDVersion>1.0</DTDVersion>
+    <DataCenterId>NSIDC</DataCenterId>
+    <GranuleURMetaData>
+        <GranuleUR>SC:SNEX20_QSI_SD_3m.001:260599753</GranuleUR>
+        <DbID>260599753</DbID>
+        <InsertTime>2023-02-07 09:54:33.194</InsertTime>
+        <LastUpdate>2023-02-07 09:54:33.194</LastUpdate>
+        <CollectionMetaData>
+            <ShortName>SNEX20_QSI_SD_3m</ShortName>
+            <VersionID>001</VersionID>
+        </CollectionMetaData>
+        <DataFiles>
+            <DataFileContainer>
+                <DistributedFileName>SNEX20_QSI_SD_3M_USUTLC_20210318_20210318.tif</DistributedFileName>
+                <FileSize>8338349</FileSize>
+                <ChecksumType>MD5</ChecksumType>
+                <Checksum>dbc04fb0b6c2aeba3f439d1ee5055b5b</Checksum>
+                <ChecksumOrigin>DPLIngst</ChecksumOrigin>
+            </DataFileContainer>
+        </DataFiles>
+        <ECSDataGranule>
+            <SizeMBECSDataGranule>7.95207</SizeMBECSDataGranule>
+            <LocalGranuleID>SNEX20_QSI_SD_3M_USUTLC_20210318_20210318.tif</LocalGranuleID>
+            <ProductionDateTime>2023-01-23 13:18:21.000</ProductionDateTime>
+            <LocalVersionID>001</LocalVersionID>
+        </ECSDataGranule>
+        <RangeDateTime>
+            <RangeEndingTime>23:59:59.000000</RangeEndingTime>
+            <RangeEndingDate>2021-03-18</RangeEndingDate>
+            <RangeBeginningTime>00:00:01.000000</RangeBeginningTime>
+            <RangeBeginningDate>2021-03-18</RangeBeginningDate>
+        </RangeDateTime>
+        <SpatialDomainContainer>
+            <HorizontalSpatialDomainContainer>
+                <GPolygon>
+                    <Boundary>
+                        <Point>
+                            <PointLongitude>-111.721</PointLongitude>
+                            <PointLatitude>40.5978</PointLatitude>
+                        </Point>
+                        <Point>
+                            <PointLongitude>-111.615</PointLongitude>
+                            <PointLatitude>40.5984</PointLatitude>
+                        </Point>
+                        <Point>
+                            <PointLongitude>-111.615</PointLongitude>
+                            <PointLatitude>40.5208</PointLatitude>
+                        </Point>
+                        <Point>
+                            <PointLongitude>-111.72</PointLongitude>
+                            <PointLatitude>40.5202</PointLatitude>
+                        </Point>
+                    </Boundary>
+                </GPolygon>
+            </HorizontalSpatialDomainContainer>
+        </SpatialDomainContainer>
+        <Platform>
+            <PlatformShortName>King Air</PlatformShortName>
+            <Instrument>
+                <InstrumentShortName>LIDAR</InstrumentShortName>
+                <Sensor>
+                    <SensorShortName>LIDAR</SensorShortName>
+                </Sensor>
+            </Instrument>
+        </Platform>
+        <PSAs>
+            <PSA>
+                <PSAName>SIPSMetGenVersion</PSAName>
+                <PSAValue>2.5</PSAValue>
+            </PSA>
+        </PSAs>
+    </GranuleURMetaData>
+</GranuleMetaDataFile>
+
