@@ -1,0 +1,83 @@
+"""
+<form action="/submit" method="post">
+  <fieldset>
+    <legend>Avalanche Forecast Form</legend>
+    
+    <label for="t1-danger">1) What would you forecast as the T1 danger on Feb 8, 2023?</label>
+    <select id="t1-danger" name="t1-danger">
+      <option value="low">Low</option>
+      <option value="moderate">Moderate</option>
+      <option value="considerable">Considerable</option>
+      <option value="high">High</option>
+      <option value="extreme">Extreme</option>
+    </select>
+    
+    <fieldset>
+      <legend>2) What would you forecast as the top problem(s) for Feb 8, 2023?</legend>
+      
+      <label for="problem1">Problem 1:</label>
+      <input type="text" id="problem1" name="problem1"><br>
+      
+      <label for="likelihood1">Likelihood:</label>
+      <input type="text" id="likelihood1" name="likelihood1"><br>
+      
+      <label for="size1">Size:</label>
+      <input type="text" id="size1" name="size1"><br>
+      
+      <label for="problem2">Problem 2:</label>
+      <input type="text" id="problem2" name="problem2"><br>
+      
+      <label for="likelihood2">Likelihood:</label>
+      <input type="text" id="likelihood2" name="likelihood2"><br>
+      
+      <label for="size2">Size:</label>
+      <input type="text" id="size2" name="size2"><br>
+      
+      <label for="problem3">Problem 3:</label>
+      <input type="text" id="problem3" name="problem3"><br>
+      
+      <label for="likelihood3">Likelihood:</label>
+      <input type="text" id="likelihood3" name="likelihood3"><br>
+      
+      <label for="size3">Size:</label>
+      <input type="text" id="size3" name="size3">
+    </fieldset>
+    
+    <fieldset>
+      <legend>3) Please rank the top three factors that affected your assessment</legend>
+      
+      <label for="factor1">Factor 1:</label>
+      <select id="factor1" name="factor1">
+        <option value="new_snowfall">New snowfall</option>
+        <option value="wind">Wind</option>
+        <option value="temperatures">Temperatures</option>
+        <option value="snowpack_observations">Snowpack observations prior to forecast date</option>
+        <option value="general_observations">General observations on forecast date</option>
+        <option value="aai">AAI on forecast date</option>
+      </select><br>
+      
+      <label for="factor2">Factor 2:</label>
+      <select id="factor2" name="factor2">
+        <option value="new_snowfall">New snowfall</option>
+        <option value="wind">Wind</option>
+        <option value="temperatures">Temperatures</option>
+        <option value="snowpack_observations">Snowpack observations prior to forecast date</option>
+        <option value="general_observations">General observations on forecast date</option>
+        <option value="aai">AAI on forecast date</option>
+      </select><br>
+      
+      <label for="factor3">Factor 3:</label>
+      <select id="factor3" name="factor3">
+        <option value="new_snowfall">New snowfall</option>
+        <option value="wind">Wind</option>
+        <option value="temperatures">Temperatures</option>
+        <option value="snowpack_observations">Snowpack observations prior to forecast date</option>
+        <option value="general_observations">General observations on forecast date</option>
+        <option value="aai">AAI on forecast date</option>
+      </select>
+    </fieldset>
+    
+    <input type="submit" value="Submit">
+  </fieldset>
+</form>
+"""
