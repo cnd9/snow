@@ -6,16 +6,57 @@
     <title>Date Landing Page</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
+        .highlight-row {
+    background-color:  #ADD8E6; /* Gold background for highlighted rows */
+}
+
+.normal-row {
+    background-color: #FFFFFF; /* White background for normal rows */
+}
+.scrollable-table {
+    margin-bottom: 2rem; /* Adds 2rem of space below each table container */
+}
+
+section > div:last-child .scrollable-table {
+    margin-bottom: 2rem; /* Adds 2rem of space below the last table container in a section */
+}
+
+section {
+    margin-bottom: 4rem; /* Increase bottom margin of sections if needed */
+}
+    .table-responsive .table {
+    margin-bottom: 0; /* Remove default margin */
+    background-color: #fff; /* Optional: sets a background color for the table */
+    }
+
+    .table-responsive .table thead th {
+        border-bottom: 2px solid #dee2e6; /* Enhance the bottom border of the header */
+    }
+
+    .table-responsive .table tbody + tbody {
+        border-top: 2px solid #dee2e6; /* Adds separation between tbody sections if applicable */
+    }
+
+    .table-responsive .table td,
+    .table-responsive .table th {
+        padding: .75rem; /* Adjust cell padding */
+        border-top: 1px solid #dee2e6; /* Adds a top border to all cells */
+    }
+
+    /* Add spacing between tables */
+    .scrollable-table + .scrollable-table {
+        margin-top: 30px; /* Adjust the spacing as needed */
+    }
     .scrollable-table {
-        max-height: 350px;
+        max-height: 450px;
         overflow-y: auto;
     }
     section {
         margin-bottom: 70px;
     }
     .scrollable-content {
-    max-height: 100px; /* Adjust as needed */
-    overflow-y: auto; /* Adds vertical scrollbar if content overflows */
+    max-height: 150px;
+    overflow-y: auto;
     }
 
     </style>
@@ -67,12 +108,9 @@
                     {{ public_html_today|safe }}
                 </div>
             </div>
-            <div>
-                <h3>Avalanche Observation Details</h3>
-            </div>
         </section>
         <section>
-            <h2 class="mb-3">4. Measured or Modeled Snow profiles?</h2>
+            <h2 class="mb-3">4. Avalanche Summary</h2>
         </section>
         <section id="yesterdayProblemsSection" data-date="{{ date }}">
             <h2 class="mb-3">5. Yesterday's Problems</h2>

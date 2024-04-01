@@ -34,8 +34,6 @@ def load_data_from_s3(file_path):
         return pd.DataFrame()
 
 
-
-
 def convert_units(df):
     # Celsius to Fahrenheit
     df['air_temp_set_1'] = df['air_temp_set_1'] * 9 / 5 + 32
@@ -149,7 +147,48 @@ def generate_dropdown(row_id):
     </select>'''
 
 
+def assign_row_class(row, date):
+    print(date)
+    print(row['avalanche_link_text'])
+    if row['startDate'] == date or date in row['avalanche_link_text']:
+        return 'highlight-row'
+    else:
+        return 'normal-row'
+
+
+# Apply the function to both DataFrames
 # Assuming `row_id` is a column in your DataFrame
+def generate_table_html(df, columns):
+    # Start the table and add the header row
+    html = '<table class="table table-hover">'
+    html += '<thead><tr>'
+    for col in columns:
+        html += f'<th>{col}</th>'
+    html += '</tr></thead>'
+    html += '<tbody>'
+
+    # Iterate over DataFrame rows
+    for index, row in df.iterrows():
+        # Determine row class based on some condition, e.g., observer type
+        row_class = row['row_class']
+        html += f'<tr class="{row_class}">'
+
+        # Add each cell in the row
+        for col in columns:
+            cell_value = row[col]
+            # If the cell contains HTML (like links), ensure it's safe to render directly
+            if isinstance(cell_value, str) and (cell_value.startswith('<a ') or cell_value.startswith('<div ')):
+                cell_html = cell_value
+            else:
+                cell_html = f'{cell_value}'  # Convert to string and HTML-escape if necessary
+            html += f'<td>{cell_html}</td>'
+
+        html += '</tr>'
+
+    # Close the table tags
+    html += '</tbody></table>'
+    return html
+
 
 @application.route('/date_landing/<date>')
 @login_required
@@ -159,42 +198,40 @@ def date_landing(date):
         return redirect(url_for('user_home'))
     date_object = datetime.strptime(date, '%Y-%m-%d')
     formatted_date = date_object.strftime('%A %Y-%m-%d')
+    formatted_date_only = date_object.strftime('%Y-%m-%d')
     start_date = date_object - timedelta(days=7)
-    day_prior = date_object - timedelta(days=1)
-    day_prior_str = day_prior.strftime('%Y-%m-%d')
+    week_later = date_object + timedelta(days=7)
     # Load data from S3
     file_path = 'observations/general/fac_2022_2023.csv'
     df = load_data_from_s3(file_path)
+    df['row_class'] = df.apply(assign_row_class, axis=1, args=(formatted_date_only,))
     df['Useful?'] = df['id'].apply(generate_dropdown)
     df['startDate'] = pd.to_datetime(df['startDate'])
     df['snowpack_description'] = df['snowpack_description'].apply(
         lambda x: f'<div class="scrollable-content">{x}</div>')
     df['link'] = df['link'].apply(
         lambda x: f'<a href="{x}" target="_blank">View</a>')
+
     filtered_df = df[(df['startDate'] > start_date) & (df['startDate'] < date_object)]
     filtered_df = filtered_df.sort_values(by='startDate', ascending=False)
     filtered_df = filtered_df.rename(columns=OBS_DISPLAY_NAMES)
+    filtered_df['Date'] = filtered_df['Date'].apply(lambda x: x.strftime('%A %Y-%m-%d'))
     # Separate DataFrames for Forecaster/Professional and Public observations
-    forecaster_professional_df = filtered_df[filtered_df['observerType'].isin(['professional', 'forecaster'])]
-    public_df = filtered_df[filtered_df['observerType'] == 'public']
+    forecaster_professional_df = filtered_df[
+        filtered_df['observerType'].isin(['professional', 'forecaster'])]  # .sort_values(by='Date', ascending=True)
+    public_df = filtered_df[filtered_df['observerType'] == 'public']  # .sort_values(by='Date', ascending=True)
+    public_html = generate_table_html(public_df, OBS_DISPLAY_COLUMNS)
+    forecaster_professional_html = generate_table_html(forecaster_professional_df, OBS_DISPLAY_COLUMNS)
 
-    # Then convert to HTML as before
-    forecaster_professional_html = forecaster_professional_df[OBS_DISPLAY_COLUMNS].to_html(
-        index=False, classes='table table-hover', escape=False)
-    public_html = public_df[OBS_DISPLAY_COLUMNS].to_html(index=False, classes='table table-hover',
-                                                         escape=False)
-
-    filtered_df = df[(df['startDate'] == date_object)]
+    # After
+    filtered_df = df[(df['startDate'] >= date_object) & (df['startDate'] < week_later)]
+    filtered_df = filtered_df.sort_values(by='startDate', ascending=True)
     filtered_df = filtered_df.rename(columns=OBS_DISPLAY_NAMES)
-    # Separate DataFrames for Forecaster/Professional and Public observations
+    filtered_df['Date'] = filtered_df['Date'].apply(lambda x: x.strftime('%A %Y-%m-%d'))
     forecaster_professional_df = filtered_df[filtered_df['observerType'].isin(['professional', 'forecaster'])]
     public_df = filtered_df[filtered_df['observerType'] == 'public']
-
-    # Then convert to HTML as before
-    forecaster_professional_html_today = forecaster_professional_df[OBS_DISPLAY_COLUMNS].to_html(
-        index=False, classes='table table-hover', escape=False)
-    public_html_today = public_df[OBS_DISPLAY_COLUMNS].to_html(index=False, classes='table table-hover',
-                                                               escape=False)
+    forecaster_professional_html_today = generate_table_html(forecaster_professional_df, OBS_DISPLAY_COLUMNS)
+    public_html_today = generate_table_html(public_df, OBS_DISPLAY_COLUMNS)
 
     weather_file_path = 'weather/synoptic/BIGMS_2022_2024.csv'
     weather_df = load_data_from_s3(weather_file_path)  # Ensure this function is correctly defined to load your data
@@ -284,6 +321,7 @@ def save_form_data():
 
     return jsonify({"message": "Data saved successfully"}), 200
 
+
 @application.route('/worksheet/<date>', methods=['GET', 'POST'])
 @login_required
 def worksheet(date):
@@ -292,9 +330,7 @@ def worksheet(date):
 
     if request.method == 'POST':
         notes = request.form['notes']
-        # Convert notes string to bytes
         notes_bytes = notes.encode('utf-8')
-        # Save the notes to S3
         s3_client.put_object(Bucket=S3_BUCKET_NAME, Key=file_path, Body=notes_bytes)
         flash('Saved successfully')
     else:
