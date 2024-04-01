@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avalanche Hindcast Form</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+  }
+  form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  fieldset {
+    border: none;
+    margin: 20px 0;
+    padding: 0;
+  }
+  legend {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+  }
+   question {
+    font-size: 1.2em;
+    margin-bottom: 200px;
+    padding:10;
+  }
+  label, select, input[type="text"] {
+    display: block;
+    margin-top: 10px;
+  }
+  select, input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  .problem-set, .factor-set {
+    margin-bottom: 20px;
+  }
+  input[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  .problem-label {
+    font-size: 20px; /* Larger font size for problem labels */
+    display: block; /* Make labels block to add spacing after them */
+    margin-bottom: 10px; /* Space between the problem label and the first dropdown */
+}
+
+.problem-section {
+    margin-bottom: 20px; /* Vertical space between problem sections */
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Define options
+ const dangerOptions = [
+    { value: "low", text: "Low" },
+    { value: "moderate", text: "Moderate" },
+    { value: "considerable", text: "Considerable" },
+    { value: "high", text: "High" },
+    { value: "extreme", text: "Extreme" }
+  ];
+
+  const problemOptions = [
+    { value: "dry_loose", text: "Dry Loose" },
+    { value: "wet_loose", text: "Wet Loose" },
+    { value: "storm_slab", text: "Storm Slab" },
+    { value: "wind_slab", text: "Wind Slab" },
+    { value: "persistent_slab", text: "Persistent Slab" },
+    { value: "deep_persistent_slab", text: "Deep Persistent Slab" },
+    { value: "wet_slab", text: "Wet Slab" },
+    { value: "glide_slab", text: "Glide Slab" },
+    { value: "cornice", text: "Cornice" },
+
+    { value: "no_problem", text: "No Additional Problem" }
+  ];
+
+  const factorOptions = [
+    { value: "precipitation", text: "Precipitation" },
+    { value: "snowpack_structure", text: "Snowpack Structure" },
+    { value: "temperatures", text: "Temperatures" },
+    { value: "wind", text: "Winds" },
+    { value: "prev_forecast", text: "Previous Forecast Problems" },
+    { value: "test_results", text: "Test Results" },
+    { value: "num_avalanches", text: "Avalanche Observations on Forecast Date" },
+    { value: "instability", text: "Instability Observations on Forecast Date" }
+  ];
+  const sensitivityOptions = [
+    { value: "unreactive", text: "Unreactive" },
+    { value: "stubborn", text: "Stubborn" },
+    { value: "reactive", text: "Reactive" },
+    { value: "touchy", text: "Touchy" },
+   ];
+  const spatialOptions = [
+    { value: "isolated", text: "Isolated" },
+    { value: "specific", text: "Specific" },
+    { value: "widespread", text: "Widespread" },
+   ];
+
+  // Function to populate dropdowns
+  function populateDropdown(selector, options) {
+    const selectElements = document.querySelectorAll(selector);
+    selectElements.forEach(select => {
+      options.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option.value;
+        opt.textContent = option.text;
+        select.appendChild(opt);
+      });
+    });
+  }
+
+  // Populate all dropdowns
+  populateDropdown('#t1-danger', dangerOptions);
+  populateDropdown('.problem-dropdown', problemOptions);
+  populateDropdown('.factor-dropdown', factorOptions);
+  populateDropdown('[id^="sensitivity"]', sensitivityOptions);
+  populateDropdown('[id^="spatial"]', spatialOptions);
+
+  // Function to set saved data values
+  function setSavedDataValues() {
+    // Assuming savedData is correctly assigned
+    const savedData = JSON.parse('{{ saved_data | tojson | safe }}');
+
+  // Set value for the 't1-danger' select field
+  if(savedData['t1-danger']) {
+    document.getElementById('t1-danger').value = savedData['t1-danger'];
+  }
+
+  // Set values for problem-related fields
+  ['problem1', 'sensitivity1', 'spatial1', 'size1',
+   'problem2', 'sensitivity2', 'spatial2', 'size2',
+   'problem3', 'sensitivity3', 'spatial3', 'size3'].forEach(field => {
+    if(savedData[field]) {
+      document.getElementById(field).value = savedData[field];
+    }
+  });
+
+  // Set values for factor-related fields
+  ['factor1', 'factor2', 'factor3'].forEach(field => {
+    if(savedData[field]) {
+      document.getElementById(field).value = savedData[field];
+    }
+  });
+    }
+
+  setSavedDataValues();
+
+  // Form submission logic
+  const form = document.querySelector('form');
+  form.onsubmit = async function(e) {
+    e.preventDefault();
+   // Gather form data
+     document.querySelectorAll('input, select').forEach((element) => {
+    console.log(element.name + ': ' + element.value);
+  });
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => data[key] = value);
+
+
+    // Send data to backend
+    try {
+      const response = await fetch('/save_form_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        console.log('Data saved successfully');
+      } else {
+        console.error('Failed to save data');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    };
+});
+      document.querySelectorAll('select').forEach(selectElement => {
+  selectElement.addEventListener('change', (event) => {
+    console.log(event.target.id + ' changed to ' + event.target.value);
+  });
+});
+</script>
+
+
+</head>
+<body>
+<form action="/submit" method="post">
+    <input type="hidden" id="date" name="date" value="{{ date }}">
+  <fieldset>
+    <legend>Avalanche Hindcast Form</legend>
+
+    <question for="t1-danger">1) What would you forecast as the T1 danger on {{ date }}?</question>
+    <select id="t1-danger" name="t1-danger">
+      <!-- Options are added by JavaScript -->
+    </select>
+
+    <!-- The structure of problems and factors can be repeated as needed -->
+    <fieldset>
+      <question>2) What would you forecast as the top problem(s) on {{ date }}?</question>
+
+      <!-- Repeated structures for problems -->
+      <!-- Problem 1 -->
+<div class="problem-set">
+    <div class="problem-section">
+        <label for="problem1" class="problem-label">Problem 1:</label>
+        <select id="problem1" name="problem1" class="problem-dropdown"></select><br>
+
+        <label for="sensitivity1">Sensitivity:</label>
+        <select id="sensitivity1" name="sensitivity1"></select><br>
+
+        <label for="spatial1">Spatial Distribution:</label>
+        <select id="spatial1" name="spatial1"></select><br>
+
+        <label for="size1">Size:</label>
+        <input type="text" id="size1" name="size1"><br>
+    </div>
+
+    <div class="problem-section">
+        <label for="problem2" class="problem-label">Problem 2:</label>
+        <select id="problem2" name="problem2" class="problem-dropdown"></select><br>
+
+        <label for="sensitivity2">Sensitivity:</label>
+        <select id="sensitivity2" name="sensitivity2"></select><br>
+
+        <label for="spatial2">Spatial Distribution:</label>
+        <select id="spatial2" name="spatial2"></select><br>
+
+        <label for="size2">Size:</label>
+        <input type="text" id="size2" name="size2"><br>
+    </div>
+
+    <div class="problem-section">
+        <label for="problem3" class="problem-label">Problem 3:</label>
+        <select id="problem3" name="problem3" class="problem-dropdown"></select><br>
+
+        <label for="sensitivity3">Sensitivity:</label>
+        <select id="sensitivity3" name="sensitivity3"></select><br>
+
+        <label for="spatial3">Spatial Distribution:</label>
+        <select id="spatial3" name="spatial3"></select><br>
+
+        <label for="size3">Size:</label>
+        <input type="text" id="size3" name="size3"><br>
+    </div>
+</div>
+      <!-- Add more problem sets as needed -->
+    </fieldset>
+
+    <fieldset>
+      <question>3) Please rank the top three factors that affected your assessment</question>
+
+      <!-- Factor 1 -->
+      <div class="factor-set">
+        <label for="factor1">Factor 1:</label>
+        <select id="factor1" name="factor1" class="factor-dropdown"></select><br>
+        <label for="factor2">Factor 2:</label>
+        <select id="factor2" name="factor2" class="factor-dropdown"></select><br>
+        <label for="factor3">Factor 3:</label>
+        <select id="factor3" name="factor3" class="factor-dropdown"></select><br>
+      </div>
+      <!-- Add more factor sets as needed -->
+    </fieldset>
+
+    <input type="submit" value="Save">
+  </fieldset>
+</form>
+</body>
+</html>

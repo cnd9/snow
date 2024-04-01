@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enter Name</title>
+</head>
+<body>
+    <h2>{{ date }}</h2>
+    <form action="/submit_name" method="post">
+        <input type="hidden" name="date" value="{{ date }}">
+        <input type="text" name="name" placeholder="Your Name">
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

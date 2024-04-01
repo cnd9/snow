@@ -1,0 +1,7 @@
+Flask~=3.0.2
+boto3
+pandas
+numpy
+regex
+Flask-Login
+matplotlib

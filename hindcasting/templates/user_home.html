@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Dates</title>
+</head>
+<body>
+    <h2>Hello, {{ user }}!</h2>
+    <h3>Your Assigned Dates:</h3>
+    <ul>
+        {% for date in dates %}
+            <li><a href="{{ url_for('date_landing', date=date) }}">Hindcasting for {{ date }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

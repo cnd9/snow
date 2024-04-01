@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worksheet</title>
+    <style>
+        /* Add some margin around the body content for better spacing */
+        body {
+            margin: 20px;
+        }
+
+        textarea {
+            /* Make the textarea take the full width of its container minus the margin */
+            width: calc(100% - 40px); /* Assuming a total of 20px margin on both sides */
+            height: 800px; /* Adjust the height to make it significantly taller */
+            resize: none; /* Optional: prevent resizing */
+        }
+    </style>
+</head>
+<body>
+    <h2>Notes for {{ date }}, {{ name }}</h2>
+    <form action="" method="post">
+        <textarea name="notes" placeholder="Enter your notes here...">{{ notes }}</textarea>
+        <input type="submit" value="Save">
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Landing Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+    .scrollable-table {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+    section {
+        margin-bottom: 70px;
+    }
+    .scrollable-content {
+    max-height: 100px; /* Adjust as needed */
+    overflow-y: auto; /* Adds vertical scrollbar if content overflows */
+    }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">{{ date }}</h1>
+        <ul class="list-unstyled">
+            <li><a href="{{ url_for('worksheet', date=date) }}" class="btn btn-primary mb-3">Notes Worksheet</a></li>
+            <!-- Added link for Avalanche Forecast Form -->
+            <li><a href="{{ url_for('avalanche_forecast_form', date=date) }}" class="btn btn-secondary mb-3">Avalanche Forecast Form</a></li>
+            <!-- Other links -->
+        </ul>
+        <section>
+            <h2 class="mb-3">1. Weather</h2>
+                <img src="data:image/png;base64,{{ weather_plot_encoded }}" alt="Weather Data Plots">
+        </section>
+        <!-- Preceding Week Observations -->
+        <section>
+            <h2 class="mb-3">2. Preceding Week Observations</h2>
+            <!-- Forecaster Observations -->
+            <div>
+                <h3>Forecaster Observations</h3>
+                <div class="table-responsive scrollable-table">
+                    {{ forecaster_professional_observations|safe }}
+                </div>
+            </div>
+            <!-- Public Observations -->
+            <div>
+                <h3>Public Observations</h3>
+                <div class="table-responsive scrollable-table">
+                    {{ public_observations|safe }}
+                </div>
+            </div>
+        </section>
+        <section>
+            <h2 class="mb-3">3. Day-of-Forecast Observations</h2>
+                        <!-- Forecaster Observations -->
+            <div>
+                <h3>Forecaster General Observations</h3>
+                <div class="table-responsive scrollable-table">
+                    {{ forecaster_professional_html_today|safe }}
+                </div>
+            </div>
+            <!-- Public Observations -->
+            <div>
+                <h3>Public General Observations</h3>
+                <div class="table-responsive scrollable-table">
+                    {{ public_html_today|safe }}
+                </div>
+            </div>
+            <div>
+                <h3>Avalanche Observation Details</h3>
+            </div>
+        </section>
+        <section>
+            <h2 class="mb-3">4. Measured or Modeled Snow profiles?</h2>
+        </section>
+        <section id="yesterdayProblemsSection" data-date="{{ date }}">
+            <h2 class="mb-3">5. Yesterday's Problems</h2>
+            <!-- Dynamically generated content will go here -->
+        </section>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const section = document.getElementById('yesterdayProblemsSection');
+    const date = section.dataset.date; // Read the date from the data attribute
+
+    fetch(`/get_yesterday_problems?date=${date}`) // Include the date in the request
+    .then(response => response.json())
+    .then(data => {
+
+        const section = document.getElementById('yesterdayProblemsSection');
+
+        Object.entries(data).forEach(([zone, problems]) => {
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            card.innerHTML = `
+                <div class="card-header">
+                    <h4>${zone}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive scrollable-table">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Problem Type</th>
+                                    <th>Problem Number</th>
+                                    <th>Likelihood</th>
+                                    <th>Size</th>
+                                    <th>Aspect/Elevation</th>
+                                    <th>Discussion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${problems.map(problem => `
+                                    <tr>
+                                        <td>${problem.problem_type}</td>
+                                        <td>${problem.problem_number}</td>
+                                        <td>${problem.likelihood}</td>
+                                        <td>${problem.size.join(', ')}</td>
+                                        <td>${Object.entries(problem.aspect_elevation).map(([key, values]) => `${key.capitalize()}: ${values.join(', ') || 'N/A'}`).join(" | ")}</td>
+                                        <td>${problem.discussion}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            section.appendChild(card);
+        });
+    })
+    .catch(error => console.error('Error fetching data:', error));
+});
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+</script>
+
+
+    </div>
+    <!-- Optional JavaScript; choose one of the two! -->
+    <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+snow/snotel/.ipynb_checkpoints/
+.idea/
+fac/.ipynb_checkpoints
+hindcasting/users.py
+hindcasting/application.zip
+fac/__pycache__/
+data/
+hindcasting.zip
+snotel/.ipynb_checkpoints/
+snotel/Untitled.ipynb
+fac/fac-weather.ipynb
+hindcasting/__pycache__/constants.cpython-39.pyc
+hindcasting/__pycache__/users.cpython-39.pyc
+fac/local_secrets.py
+fac/fac_forecast-Copy1.ipynb
+hindcasting/constants.py
+hindcasting/__pycache__/constants.cpython-39.pyc
