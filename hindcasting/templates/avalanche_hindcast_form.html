@@ -26,9 +26,9 @@
     margin-bottom: 20px;
   }
    question {
-    font-size: 1.2em;
-    margin-bottom: 200px;
-    padding:10;
+    font-size: 1.4em;
+    margin-top: 200px;
+    margin-bottom: 500px;
   }
   label, select, input[type="text"] {
     display: block;
@@ -43,6 +43,10 @@
   }
   .problem-set, .factor-set {
     margin-bottom: 20px;
+        padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
   }
   input[type="submit"] {
     background-color: #007bff;
@@ -57,7 +61,7 @@
     background-color: #0056b3;
   }
   .problem-label {
-    font-size: 20px; /* Larger font size for problem labels */
+    font-size: 18px; /
     display: block; /* Make labels block to add spacing after them */
     margin-bottom: 10px; /* Space between the problem label and the first dropdown */
 }
@@ -98,8 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
     { value: "wind", text: "Winds" },
     { value: "prev_forecast", text: "Previous Forecast Problems" },
     { value: "test_results", text: "Test Results" },
-    { value: "num_avalanches", text: "Avalanche Observations on Forecast Date" },
-    { value: "instability", text: "Instability Observations on Forecast Date" }
+    { value: "num_avalanches", text: "Avalanche Observations in Vicinity of Forecast Date" },
+    { value: "instability", text: "Instability Observations in Vicinity of Forecast Date" }
   ];
   const sensitivityOptions = [
     { value: "unreactive", text: "Unreactive" },
@@ -186,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       if (response.ok) {
         console.log('Data saved successfully');
+        alert('Thanks! Your current choices are saved if you exit the form and come back.');
       } else {
         console.error('Failed to save data');
       }
@@ -211,15 +216,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <question for="t1-danger">1) What would you forecast as the T1 danger on {{ date }}?</question>
     <select id="t1-danger" name="t1-danger">
-      <!-- Options are added by JavaScript -->
     </select>
 
-    <!-- The structure of problems and factors can be repeated as needed -->
     <fieldset>
       <question>2) What would you forecast as the top problem(s) on {{ date }}?</question>
 
-      <!-- Repeated structures for problems -->
-      <!-- Problem 1 -->
 <div class="problem-set">
     <div class="problem-section">
         <label for="problem1" class="problem-label">Problem 1:</label>

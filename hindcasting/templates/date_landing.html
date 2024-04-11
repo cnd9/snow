@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Date Landing Page</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <style>
         .highlight-row {
     background-color:  #ADD8E6; /* Gold background for highlighted rows */
@@ -25,21 +26,21 @@ section {
     margin-bottom: 4rem; /* Increase bottom margin of sections if needed */
 }
     .table-responsive .table {
-    margin-bottom: 0; /* Remove default margin */
-    background-color: #fff; /* Optional: sets a background color for the table */
+    margin-bottom: 0;
+    background-color: #fff;
     }
 
     .table-responsive .table thead th {
-        border-bottom: 2px solid #dee2e6; /* Enhance the bottom border of the header */
+        border-bottom: 2px solid #dee2e6;
     }
 
     .table-responsive .table tbody + tbody {
-        border-top: 2px solid #dee2e6; /* Adds separation between tbody sections if applicable */
+        border-top: 2px solid #dee2e6;
     }
 
     .table-responsive .table td,
     .table-responsive .table th {
-        padding: .75rem; /* Adjust cell padding */
+        padding: .75rem;
         border-top: 1px solid #dee2e6; /* Adds a top border to all cells */
     }
 
@@ -58,65 +59,112 @@ section {
     max-height: 150px;
     overflow-y: auto;
     }
-
-    </style>
+.highlight-row:hover {
+    background-color: #ADD8E6;
+}
+        .table-responsive .table .highlight-row:hover {
+    background-color: #ADD8E6 !important;
+}
+   .bold-and-large {
+  font-size: 34px;
+  font-weight: bold;
+}
+        .plot-explanation {
+    font-style: italic;
+    margin-bottom: 15px;
+    /* Add any other styles you want here, such as font-size, color, etc. */
+}
+</style>
 </head>
 <body>
+<input type="hidden" id="date" value="{{ date }}">
     <div class="container mt-5">
-        <h1 class="mb-4">{{ date }}</h1>
-        <ul class="list-unstyled">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-4 flex-grow-1">{{ date }}</h1>
+            <!-- Homepage button next to the date -->
+            <a href="/user_home" class="btn btn-outline-primary ml-2">Homepage</a>
+        </div>
+        <ul class="list-unstyled d-flex">
             <li><a href="{{ url_for('worksheet', date=date) }}" class="btn btn-primary mb-3">Notes Worksheet</a></li>
-            <!-- Added link for Avalanche Forecast Form -->
-            <li><a href="{{ url_for('avalanche_forecast_form', date=date) }}" class="btn btn-secondary mb-3">Avalanche Forecast Form</a></li>
-            <!-- Other links -->
+            <!-- Avalanche Forecast Form Link -->
+            <li><a href="{{ url_for('avalanche_forecast_form', date=date) }}" class="btn btn-secondary mb-3 ml-2">Avalanche Hindcast Form</a></li>
+            <!-- Submit Button -->
+            <li><button id="submitDateBtn" class="btn btn-success mb-3 ml-4">Submit</button></li>
+            <i class="fa fa-info-circle ml-2" data-toggle="tooltip" title="Press save on the forms as you work on them to have your inputs saved for when you come back."></i>
         </ul>
         <section>
-            <h2 class="mb-3">1. Weather</h2>
+            <h2 class="mb-3 bold-and-large">1. Weather</h2>
                 <img src="data:image/png;base64,{{ weather_plot_encoded }}" alt="Weather Data Plots">
         </section>
         <!-- Preceding Week Observations -->
         <section>
-            <h2 class="mb-3">2. Preceding Week Observations</h2>
-            <!-- Forecaster Observations -->
+            <h2 class="mb-3 bold-and-large">2. Preceding Week Observations
+            <i class="fa fa-info-circle" data-toggle="tooltip" title="Observations are shown here for the week leading up to your hindcast date, from most recent to least recent.  Please indicate the extent to which a given observation influenced your hindcast via the dropdowns.  Your selections will be saved if you leave the page and come back."></i>
+            </h2><!-- Forecaster Observations -->
             <div>
-                <h3>Forecaster Observations</h3>
+                <h3>2.1 Forecaster Observations</h3>
                 <div class="table-responsive scrollable-table">
                     {{ forecaster_professional_observations|safe }}
                 </div>
             </div>
             <!-- Public Observations -->
             <div>
-                <h3>Public Observations</h3>
+                <h3>2.2 Public Observations</h3>
                 <div class="table-responsive scrollable-table">
                     {{ public_observations|safe }}
                 </div>
             </div>
         </section>
         <section>
-            <h2 class="mb-3">3. Day-of-Forecast Observations</h2>
-                        <!-- Forecaster Observations -->
+        <h2 class="mb-3 bold-and-large">3. Day-of-Hindcast and Later Observations
+            <i class="fa fa-info-circle" data-toggle="tooltip" title="Observations are shown for your hindcast date and the week following. Blue rows highlight obs taken on the hindcast date, or obs with an avalanche back-estimated to have occurred on the hindcast date."></i>
+        </h2>
+             <!-- Forecaster Observations -->
             <div>
-                <h3>Forecaster General Observations</h3>
+                <h3>3.1 Forecaster Observations</h3>
                 <div class="table-responsive scrollable-table">
                     {{ forecaster_professional_html_today|safe }}
                 </div>
             </div>
             <!-- Public Observations -->
             <div>
-                <h3>Public General Observations</h3>
+                <h3>3.2 Public Observations</h3>
                 <div class="table-responsive scrollable-table">
                     {{ public_html_today|safe }}
                 </div>
             </div>
         </section>
         <section>
-            <h2 class="mb-3">4. Avalanche Summary</h2>
+            <h2 class="mb-3 bold-and-large">4. Avalanche Summary</h2>
+                <div class="table-responsive scrollable-table">
+                    {{ avalanche_html_today |safe }}
+                </div>
+                        <h4>AAI for {{date}}: {{aai}}</h4>
+            <h5><br></h5>
+                <h5 class="mb-3 bold-and-large">Activity Plots </h5>
+                <p class="plot-explanation" style="font-style: italic;">
+                Plot 1: Avalanche activity with known dates.
+                </p>
+                <p class="plot-explanation" style="font-style: italic;">
+                    Plot 2: Avalanche activity with unknown date, plotted on the date it was estimated to have occurred, with a bar extending out to the day it was observed. This may help indicate whether avalanches with uncertain dating occurred close to your hindcast date.
+                </p>
+                <!-- Include the image for Plot 2 here -->
+
+                <p class="plot-explanation" style="font-style: italic;">
+                    Plot 3: For reference, the total number of field observations (with or without avalanche sightings) on a given day. This provides a context for the avalanche data, by showing how many people were in the field and able to observe avalanches on a given day.
+                </p>
+                <p>Your hindcast date is in red on the x-axes.</p>
+                <img src="data:image/png;base64,{{ avalanche_plot_encoded }}" alt="Avalanche Activity (WIP)">
+
         </section>
         <section id="yesterdayProblemsSection" data-date="{{ date }}">
-            <h2 class="mb-3">5. Yesterday's Problems</h2>
+            <h2 class="mb-3 bold-and-large">5. Yesterday's Problems</h2>
             <!-- Dynamically generated content will go here -->
         </section>
 
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -126,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch(`/get_yesterday_problems?date=${date}`) // Include the date in the request
     .then(response => response.json())
     .then(data => {
-
         const section = document.getElementById('yesterdayProblemsSection');
 
         Object.entries(data).forEach(([zone, problems]) => {
@@ -167,20 +214,86 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             section.appendChild(card);
         });
+
+        // After the dropdowns are added to the DOM, set their saved values
+        setSavedDataValues();
     })
     .catch(error => console.error('Error fetching data:', error));
-});
 
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-}
+    String.prototype.capitalize = function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    }
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    // Function to set saved dropdown values
+    function setSavedDataValues() {
+        // Assuming savedData is correctly assigned
+        const savedData = JSON.parse('{{ saved_data | tojson | safe }}');
+
+        // Dynamically set value for the 'usefulness_{row_id}' dropdowns
+        Object.keys(savedData).forEach(key => {
+            if(key.startsWith('usefulness_')) {
+                const element = document.getElementsByName(key)[0]; // Assumes name attribute is used to identify dropdown
+                if(element) {
+                    element.value = savedData[key];
+                }
+            }
+        });
+    }
+
+    setSavedDataValues();
+
+        document.querySelectorAll('select').forEach(dropdown => {
+        dropdown.addEventListener('change', async function() {
+            // Object to hold form data
+            const data = {};
+
+            // Gather data from all inputs and selects
+            document.querySelectorAll('input, select').forEach(element => {
+                data[element.name] = element.value;
+            });
+
+            // Send data to backend
+            try {
+                const response = await fetch('/save_dropdown_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    console.log('Dropdown data saved successfully');
+                } else {
+                    console.error('Failed to save dropdown data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+});
+document.getElementById('submitDateBtn').addEventListener('click', function() {
+    fetch('/submit_date', {
+        method: 'POST',
+        body: JSON.stringify({date: document.getElementById('date').value}),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if(response.ok) {
+            alert("Thanks! You can return to your other dates at the Homepage now, or re-submit if you make any changes.");
+        } else {
+            alert("There was an issue with the submission. Please try again.");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
 </script>
 
-
-    </div>
-    <!-- Optional JavaScript; choose one of the two! -->
-    <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </body>
 </html>
