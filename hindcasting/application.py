@@ -12,6 +12,9 @@ from werkzeug.security import check_password_hash
 import boto3
 import pandas as pd
 import numpy as np
+import matplotlib
+
+matplotlib.use('Agg')  # Use a non-GUI backend
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import matplotlib.dates as mdates
@@ -67,7 +70,7 @@ def plot_weather_data(all_data, date):
     end_date = date + timedelta(days=1, hours=23, minutes=59, seconds=59)
     df = all_data[(all_data['Date_Time'] >= start_date) & (all_data['Date_Time'] <= end_date)]
     season_df = all_data[(all_data['Date_Time'] >= season_start_date) & (all_data['Date_Time'] <= end_date)]
-
+    idxs = {'STAM8':0,'NOISY':1,'FTMM8':2}
     df['date'] = df['Date_Time'].dt.date
     df['wind_direction'] = df['wind_direction'].astype(float)
 
@@ -88,13 +91,18 @@ def plot_weather_data(all_data, date):
     interval_avg['avg_wind_dir_rad'] = np.arctan2(interval_avg['v_component'], interval_avg['u_component'])
     interval_avg['avg_wind_dir'] = np.rad2deg(interval_avg['avg_wind_dir_rad']) % 360
 
+    daily_df = df.groupby(['Station_ID', 'date']).agg({
+        'precip_accum_in': 'last',
+    }).reset_index()
+    daily_df['daily_diff'] = daily_df.groupby('Station_ID')['precip_accum_in'].diff().fillna(0)
     fig, axs = plt.subplots(5, 1, figsize=(10, 20))
     stations = df['Station_ID'].dropna().unique()
 
     legend_added = set()  # To keep track of legends already added
-
-    for station in stations:
+    bar_width = 0.22
+    for idx, station in enumerate(stations):
         station_df = df[df['Station_ID'] == station].sort_values('Date_Time')
+        station_daily_df = daily_df[daily_df['Station_ID'] == station]
         station_season_df = season_df[season_df.Station_ID == station].sort_values('Date_Time')
         interval_avg_station = interval_avg[interval_avg['Station_ID'] == station]
 
@@ -120,33 +128,45 @@ def plot_weather_data(all_data, date):
                     axs[2].quiver(interval_start, 0, u, v,
                                   color=color, headlength=0.1, headwidth=0.1, headaxislength=0.1, width=0.002)
 
-        if np.sum(station_df['precip_accum_cm']) > 0:
+        if np.sum(station_df['precip_accum_in']) > 0:
             if station != 'HORNET':
                 axs[3].plot(station_df['Date_Time'],
-                            station_df['precip_accum_cm'].values - station_df['precip_accum_cm'].iloc[0],
+                            station_df['precip_accum_in'].values - station_df['precip_accum_in'].iloc[0],
                             label=station, color=color)
-        if np.sum(station_df['snow_water_equiv_cm']) > 0:
-            axs[4].plot(station_season_df['Date_Time'], station_season_df['snow_water_equiv_cm'], label=station,
+                if station in ['STAM8','NOISY','FTMM8']:
+                # Plotting daily precipitation difference as bars
+                    new_dates = [
+                        mdates.date2num(date) + .25 + .25*idxs[station] for date in station_daily_df['date']]
+                    print(new_dates)
+                    axs[3].bar(new_dates, station_daily_df['daily_diff'], color=color, width=bar_width, label=station+' Daily Delta')
+
+        if np.sum(station_df['snow_water_equiv_in']) > 0:
+            axs[4].plot(station_season_df['Date_Time'], station_season_df['snow_water_equiv_in'], label=station,
                         color=station_colors[station])
     axs[0].axhline(y=32, color='blue', linestyle='--', label='Freezing point')  # Add this line
-    axs[2].set_title('Station Temperature Last 2 Weeks')
-    axs[2].set_title('Vector Average Station Wind Direction Last 2 Weeks (12 Hour Intervals)')
+    # Titles
+    axs[0].set_title('Station Temperature Last 2 Weeks')
     axs[1].set_title('Station Wind Speed Last 2 Weeks (mph)')
-    axs[3].set_title('Net Accumulated Precipitation Last 2 Weeks (cm)')
-    axs[4].set_title('Snow Water Equivalent Season to Date (cm)')
-    axs[4].set_ylabel('Precip Accum (cm)')
-    axs[4].set_ylabel('SWE (cm)')
-    axs[4].legend()
+    axs[2].set_title('Vector Average Station Wind Direction Last 2 Weeks (12 Hour Intervals)')
+    axs[3].set_title('Net Accumulated Precipitation Last 2 Weeks (in)')
+    axs[4].set_title('Snow Water Equivalent Season to Date (in)')
 
+    axs[0].set_ylabel('Temperature (F)')
+    axs[3].set_ylabel('Precip Accum (in)')
+    axs[4].set_ylabel('SWE (in)')
+    axs[2].yaxis.set_visible(False)
+    axs[1].set_ylabel('Wind Speed (mph)')
+
+    for ax in axs[0:-1]:
+        ax.xaxis.set_major_locator(mdates.DayLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     for ax in axs:
         ax.axvline(pd.to_datetime(date), color='r', linestyle='--', label='Forecast Date Start and Stop')
         ax.axvline(pd.to_datetime(date) + timedelta(days=1), color='r', linestyle='--', )
-
         ax.legend(ncol=3)
-    axs[2].yaxis.set_visible(False)
-    axs[1].set_ylabel('Wind Speed (mph)')
-    for a in axs:
-        a.tick_params(axis='x', rotation=35)
+        ax.tick_params(axis='x', rotation=35)
+        ax.grid('on')
+
     fig.tight_layout()
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
@@ -253,7 +273,7 @@ def plot_avalanche_data(df, date, obs_df):
                 label.set_weight('bold')
     max_height_kdf = max([y_offset_kdf[date] for date in y_offset_kdf if
                           start_x_date <= date <= end_x_date], default=0)
-    ax[0].set_ylim(0, max_height_kdf * 1.1)  # Adjust the 1.1 as needed to provide some padding above the tallest bar
+    ax[0].set_ylim(0, max_height_kdf * 1.1)
     max_height_idf = max(
         [y_offset[date] for date in y_offset if start_x_date <= date <= end_x_date],
         default=0)
@@ -391,9 +411,8 @@ def date_landing(date):
     start_date = date_object - timedelta(days=7)
     week_later = date_object + timedelta(days=7)
     # Load data from S3
-    file_path = f'observations/general/fac_{int(season-1)}_{season}.csv'
+    file_path = f'observations/general/fac_{int(season - 1)}_{season}.csv'
     df = load_data_from_s3(file_path)
-    print(df.columns)
     df['row_class'] = df.apply(assign_row_class, axis=1, args=(formatted_date_only,))
     df['Useful?'] = df['id'].apply(generate_dropdown)
     df['startDate'] = pd.to_datetime(df['startDate'])
@@ -426,13 +445,12 @@ def date_landing(date):
 
     weather_file_path = 'weather/synoptic/all_v2_2022_2024.csv'
     weather_df = load_data_from_s3(weather_file_path)
-    date_object = datetime.strptime(date, '%Y-%m-%d')
 
     # Filter and plot weather data
     weather_df['Date_Time'] = pd.to_datetime(weather_df['Date_Time'])  # .dt.tz_localize('UTC')
     weather_plot_encoded = plot_weather_data(weather_df, date)
 
-    avalanche_file_path = f'observations/avalanche/fac_{int(season-1)}_{season}.csv'
+    avalanche_file_path = f'observations/avalanche/fac_{int(season - 1)}_{season}.csv'
     avalanche_df = load_data_from_s3(avalanche_file_path)
     filtered_df = avalanche_df[avalanche_df.date == formatted_date_only]
     filtered_df['row_class'] = 'normal-row'
@@ -528,7 +546,7 @@ def worksheet(date):
         put_s3_object(notes_bytes, filename)
         flash('Saved successfully')
     else:
-        obj = get_s3_object(filename, format='utf-8', default='')
+        notes = get_s3_object(filename, format='utf-8', default='')
 
     return render_template('worksheet.html', date=date, name=username, notes=notes)
 
